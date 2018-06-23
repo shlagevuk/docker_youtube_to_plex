@@ -114,7 +114,6 @@ with open(input_file,'r', newline='') as csvfile:
                 '--restrict-filenames',
                 '--format', 'bestvideo+bestaudio/best',
                 '--merge-output-format', 'mkv',
-                '--playlist-items', '1,2,3', # debug
                 '--download-archive', download_archive,
                 '-o', target_dir + 'tmp/' + ytdl_output_path,
                 ytdl_url]
@@ -126,6 +125,8 @@ with open(input_file,'r', newline='') as csvfile:
         #
         # Prepare to cleanup downloaded files and move folder to final destinations
         #
+        if not os.listdir(target_dir + 'tmp/'):
+            continue
         channel_name=os.listdir(target_dir + 'tmp/')[0]
         playlist_name=os.listdir(target_dir + 'tmp/' + channel_name )[0]
         playlist_path=target_dir + "tmp/" + channel_name + '/' + playlist_name + '/'
@@ -139,14 +140,14 @@ with open(input_file,'r', newline='') as csvfile:
                 if playlist.endswith(playlist_name):
                     target_playlist_name=playlist
                     logging.info("found matching playlist : " + playlist)
-                    target_playlist_season= int(target_playlist_name[1:4])
+                    target_playlist_season= int(target_playlist_name[1:3])
 
                     # if a playlist already exist it may have video in it
                     playlist_dir_list=os.listdir(target_dir + channel_name + '/' + playlist + '/')
                     if playlist_dir_list:
                         #filter item, keep ones begening with 'E'
-                        playlist_dir_list_filtered= [item for item in playlist_dir_list if item.startswith('E')]
-                        target_episode = int(max(playlist_dir_list_filtered)[1:4])
+                        playlist_dir_list_filtered= [item for item in playlist_dir_list if item.startswith('S')]
+                        target_episode = int(max(playlist_dir_list_filtered)[1:3])
                         logging.info("found last episode as N°: " + str(target_episode))
 
             # what is the last "season" existing (S0X_channel_name)?
@@ -155,16 +156,16 @@ with open(input_file,'r', newline='') as csvfile:
                 if playlist_list:
                     #filter item, keep ones begening with 'S'
                     playlist_list_filtered= [item for item in playlist_list if item.startswith('S')]
-                    target_playlist_season = int(max(playlist_list_filtered)[1:4])
+                    target_playlist_season = int(max(playlist_list_filtered)[1:3])
                     logging.info("found last season as N°: " + str(target_playlist_season))
 
                 # create /dest/channel_name/S0Y_playlist_name/ where S0Y is S0X +1
-                target_playlist_name="S" + str(target_playlist_season + 1).zfill(3)+ "_" + playlist_name
+                target_playlist_name="S" + str(target_playlist_season + 1).zfill(2)+ "_" + playlist_name
                 os.makedirs(target_dir + channel_name + '/' + target_playlist_name)
         else:
             # create both /dest/channel_name and /dest/channel_name/S01_playlist_name/
             os.makedirs(target_dir + channel_name)
-            target_playlist_name="S" + str(target_playlist_season + 1).zfill(3)+ "_" + playlist_name
+            target_playlist_name="S" + str(target_playlist_season + 1).zfill(2)+ "_" + playlist_name
             os.makedirs(target_dir + channel_name + '/' + target_playlist_name)
 
         # Remove *.info.json and *.description from tmp folder
@@ -184,7 +185,7 @@ with open(input_file,'r', newline='') as csvfile:
         for file in list_of_files:
             file_path, file_name = os.path.split(file)
             file_basename, file_ext_vid=os.path.splitext(file_name)
-            file_target_name='E' + str(target_episode +1).zfill(3) + file_basename[8:]
+            file_target_name="S" + str(target_playlist_season + 1).zfill(2) + 'E' + str(target_episode +1).zfill(2) + file_basename[8:]
 
             logging.info("generating thumbnails and renaming " + file_basename + " to "+ target_playlist_path + file_target_name)
             # moving video file
@@ -203,8 +204,8 @@ with open(input_file,'r', newline='') as csvfile:
             # If we are at E001 we use thumbnails for the whole "Season"
             if target_episode == 0:
                 logging.info("Copiing first episode thumbnails for season thumbnails")
-                shutil.copy(target_playlist_path + file_target_name + ".jpg",target_playlist_path + "Season" + str(target_playlist_season + 1).zfill(3) + ".jpg")
-                shutil.copy(target_playlist_path + file_target_name + "-fanart.jpg",target_playlist_path + "Season" + str(target_playlist_season + 1).zfill(3) + "-banner.jpg")
+                shutil.copy(target_playlist_path + file_target_name + ".jpg",target_playlist_path + "season" + str(target_playlist_season + 1).zfill(2) + ".jpg")
+                shutil.copy(target_playlist_path + file_target_name + "-fanart.jpg",target_playlist_path + "season" + str(target_playlist_season + 1).zfill(2) + "-banner.jpg")
             target_episode+=1
 
         shutil.rmtree(target_dir + "tmp/" + channel_name )
