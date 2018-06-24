@@ -18,5 +18,3 @@ RUN chmod +x /usr/local/sbin/youtube_to_plex.py
 WORKDIR /data
 
 ENTRYPOINT ["youtube_to_plex.py"]
-
-CMD [""]
