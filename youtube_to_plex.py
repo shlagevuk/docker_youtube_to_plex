@@ -160,7 +160,8 @@ with open(input_file,'r', newline='') as csvfile:
                     logging.info("found last season as N°: " + str(target_playlist_season))
 
                 # create /dest/channel_name/S0Y_playlist_name/ where S0Y is S0X +1
-                target_playlist_name="S" + str(target_playlist_season + 1).zfill(2)+ "_" + playlist_name
+                target_playlist_season+=1
+                target_playlist_name="S" + str(target_playlist_season).zfill(2)+ "_" + playlist_name
                 os.makedirs(target_dir + channel_name + '/' + target_playlist_name)
         else:
             # create both /dest/channel_name and /dest/channel_name/S01_playlist_name/
